@@ -13,20 +13,30 @@ services:
     container_name: proxy
     image: ryanformio/formio-proxy
     ports:
-      - 8000:80
-    depends_on:
+      - 80:80
+    links:
       - api-server
       - pdf-server
     networks:
       - formio-dev
+    logging:
+      driver: stdout
   ##############################################
   ## API SERVER
   ##############################################
   api-server:
     container_name: api-server
-    image: ryanformio/formio-test-server
-    ports:
-      - "3000:3000"
+    image: formio/formio-enterprise:8.0.0-rc.35
+    logging:
+      driver: stdout
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY}
+      MONGO: ${MONGO}
+      DEBUG: "formio.*"
+      PDF_SERVER: http://pdf-server:4005
+      PORTAL_ENABLED: 1
+      ADMIN_KEY: thisIsMyXAdminKey
+      PORT: 3000
     networks:
       - formio-dev
   ##############################################
@@ -34,11 +44,15 @@ services:
   ##############################################
   pdf-server:
     container_name: pdf-server
-    image: ryanformio/formio-pdf-server
-    build:
-      context: .
-      dockerfile: pdf/Dockerfile
+    image: formio/pdf-server:5.0.0-rc.3
+    logging:
+      driver: stdout
     ports:
       - "4005:4005"
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY}
+      MONGO: ${MONGO}
+      FORMIO_PDF_PORT: 4005
+      DEBUG: "pdf.*"
     networks:
       - formio-dev
