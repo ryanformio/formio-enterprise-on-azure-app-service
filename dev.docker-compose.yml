@@ -1,0 +1,57 @@
+version: '3'
+##############################################
+## DOCKER NETWORK
+##############################################
+networks:
+  formio-dev:
+    driver: bridge
+services:
+  ##############################################
+  ## PROXY
+  ##############################################
+  proxy:
+    container_name: proxy
+    image: ryanformio/formio-proxy
+    ports:
+      - 3000:80
+    links:
+      - api-server
+      - pdf-server
+    networks:
+      - formio-dev
+  ##############################################
+  ## API SERVER
+  ##############################################
+  api-server:
+    container_name: api-server
+    image: formio/formio-enterprise:8.0.0-rc.35
+    environment:
+      MONGO: ${MONGO}
+      LICENSE_KEY: ${LICENSE_KEY}
+      DEBUG: "*.*"
+      PDF_SERVER: http://pdf-server:4005
+      PORTAL_ENABLED: 1
+      ADMIN_KEY: ${ADMIN_KEY}
+      PORT: 3000
+    networks:
+      - formio-dev
+    # env_file:
+    #   - .env
+  ##############################################
+  ## PDF SERVER
+  ##############################################
+  pdf-server:
+    container_name: pdf-server
+    image: formio/pdf-server:5.0.0-rc.3
+    ports:
+      - "4005:4005"
+    environment:
+      # MONGO_CA: /src/certs/rds-combined-ca-bundle.pem
+      MONGO: ${MONGO}
+      FORMIO_PDF_PORT: 4005
+      # DEBUG: "pdf.*"
+    networks:
+      - formio-dev
+    env_file:
+      - .env
+    

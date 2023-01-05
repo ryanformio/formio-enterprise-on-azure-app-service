@@ -1,0 +1,47 @@
+version: '3'
+##############################################
+## DOCKER NETWORK
+##############################################
+networks:
+  formio-dev:
+    driver: bridge
+services:
+  ##############################################
+  ## PROXY
+  ##############################################
+  proxy:
+    container_name: proxy
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    ports:
+      - 8000:80
+    depends_on:
+      - api-server
+      - pdf-server
+    networks:
+      - formio-dev
+  ##############################################
+  ## API SERVER
+  ##############################################
+  api-server:
+    container_name: api-server
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - formio-dev
+  ##############################################
+  ## PDF SERVER
+  ##############################################
+  pdf-server:
+    container_name: pdf-server
+    build:
+      context: .
+      dockerfile: pdf/Dockerfile
+    ports:
+      - "4005:4005"
+    networks:
+      - formio-dev
