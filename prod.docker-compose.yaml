@@ -4,9 +4,9 @@
 ## https://github.com/ryanformio/formio-enterprise-on-azure-app-service
 #########################################################
 version: '3'
-##############################################
+#########################################################
 ## DOCKER NETWORK
-##############################################
+#########################################################
 networks:
   formio-dev:
     driver: bridge
@@ -35,17 +35,17 @@ services:
     logging:
       driver: stdout
     environment:
+      MONGO: ${MONGO}
+      LICENSE_KEY: ${LICENSE_KEY}
       DEBUG: "formio.*"
       PDF_SERVER: http://pdf-server:4005
       PORTAL_ENABLED: 1
-      PORT: 3000
-      MONGO: ${MONGO}
-      LICENSE_KEY: ${LICENSE_KEY}
       ADMIN_KEY: ${ADMIN_KEY}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASS: ${ADMIN_PASS}
       DB_SECRET: ${DB_SECRET}
       JWT_SECRET: ${JWT_SECRET}
+      PORT: 3000
     networks:
       - formio-dev
   ##############################################
@@ -59,11 +59,11 @@ services:
     ports:
       - "4005:4005"
     environment:
-      FORMIO_PDF_PORT: 4005
-      DEBUG: "pdf.*"
       LICENSE_KEY: ${LICENSE_KEY}
       MONGO: ${MONGO}
       FORMIO_AZURE_CONNECTION_STRING: ${FORMIO_AZURE_CONNECTION_STRING}
       FORMIO_AZURE_CONTAINER: ${FORMIO_AZURE_CONTAINER}
+      FORMIO_PDF_PORT: 4005
+      DEBUG: "pdf.*"
     networks:
       - formio-dev
