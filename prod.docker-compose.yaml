@@ -1,14 +1,10 @@
-#########################################################
-## Repository Details
-##
-## https://github.com/ryanformio/formio-enterprise-on-azure-app-service
-#########################################################
+## FILE: docker-compose.yml
 version: '3'
 #########################################################
 ## DOCKER NETWORK
 #########################################################
 networks:
-  formio-dev:
+  formio-network:
     driver: bridge
 services:
   ##############################################
@@ -18,44 +14,44 @@ services:
     container_name: proxy
     image: ryanformio/formio-proxy
     ports:
-      - 80:80
+      - 3000:80
     links:
       - api-server
       - pdf-server
     networks:
-      - formio-dev
-    logging:
-      driver: stdout
+      - formio-network
+    ## Comment out if running locally, for streaming logs to Azure
+    # logging:
+    #   driver: stdout
   ##############################################
   ## API SERVER
   ##############################################
   api-server:
     container_name: api-server
-    image: formio/formio-enterprise:8.0.0-rc.35
-    logging:
-      driver: stdout
+    image: formio/formio-enterprise:${API_TAG}
     environment:
-      MONGO: ${MONGO}
-      LICENSE_KEY: ${LICENSE_KEY}
+      PORT: 3000
       DEBUG: "formio.*"
       PDF_SERVER: http://pdf-server:4005
       PORTAL_ENABLED: 1
+      MONGO: ${MONGO}
+      LICENSE_KEY: ${LICENSE_KEY}
       ADMIN_KEY: ${ADMIN_KEY}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASS: ${ADMIN_PASS}
       DB_SECRET: ${DB_SECRET}
       JWT_SECRET: ${JWT_SECRET}
-      PORT: 3000
     networks:
-      - formio-dev
+      - formio-network
+    ## Comment out if running locally, for streaming logs to Azure
+    # logging:
+    #   driver: stdout
   ##############################################
   ## PDF SERVER
   ##############################################
   pdf-server:
     container_name: pdf-server
-    image: formio/pdf-server:5.0.0-rc.3
-    logging:
-      driver: stdout
+    image: formio/pdf-server:${PDF_TAG}
     ports:
       - "4005:4005"
     environment:
@@ -66,4 +62,7 @@ services:
       FORMIO_PDF_PORT: 4005
       DEBUG: "pdf.*"
     networks:
-      - formio-dev
+      - formio-network
+    ## Comment out if running locally, for streaming logs to Azure
+    # logging:
+    #   driver: stdout
